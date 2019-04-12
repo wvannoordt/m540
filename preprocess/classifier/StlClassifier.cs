@@ -121,7 +121,7 @@ namespace m540
 			//Wait for all threads to complete.
 			while (!MathTools.CheckAll(thread_signin))
 			{
-				Thread.Sleep(50);
+				Thread.Sleep(1);
 			}
 			temp_facet_data = null;	
 			
