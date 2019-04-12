@@ -1,0 +1,177 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using _3DSimple;
+
+namespace STL_Loader_v1
+{
+    public class STL
+    {
+        private List<Facet> data;
+        int facetCount = 0;
+        public int FacetCount
+        {
+            get { return facetCount; }
+        }
+        public STL(string path)
+        {
+            bool ded = false;
+            data = ParseSTL(path, out ded);
+            facetCount = data.Count;
+            if (ded)
+            {
+                throw new ArgumentException("File reading failed: file could be corrupt.");
+            }
+        }
+        public STL(List<Facet> DATA)
+        {
+            data = DATA;
+            facetCount = data.Count;
+        }
+        public Facet this[int i]
+        {
+            get { return data[i]; }
+
+        }
+        private List<Facet> ParseSTL(string path, out bool failed)
+        {
+            bool isbinary = false;
+            List<Facet> fs = new List<Facet>();
+            failed = false;
+            using (System.IO.StreamReader d = new System.IO.StreamReader(path))
+            {
+                int i = 0;
+                bool done = false;
+                string header = d.ReadLine();
+                while (!done && !isbinary)
+                {
+                    //facet normal i j k
+                    string currentline1 = d.ReadLine();
+
+
+                    //garbage
+                    string currentline2 = d.ReadLine();
+
+                    //vertex x y z
+                    string currentline3 = d.ReadLine();
+
+
+                    //vertex x y z
+                    string currentline4 = d.ReadLine();
+
+
+                    //vertex x y z
+                    string currentline5 = d.ReadLine();
+
+
+                    //garbage
+                    string currentline6 = d.ReadLine();
+
+                    //garbage
+                    string currentline7 = d.ReadLine();
+                    //if (i++ == 1 && !currentline1.Contains("facet") && !done)
+                    try
+                    {
+                        if (++i == 1 && !currentline1.Contains("facet"))
+                        {
+                            isbinary = true;
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        failed = true;
+                        break;
+                    }
+                    if (currentline1 == null || currentline2 == null || currentline3 == null || currentline4 == null || currentline5 == null || currentline6 == null || currentline7 == null)
+                    {
+                        done = true;
+                        //This might cause a problem
+                        break;
+                    }
+                    string[] l1 = currentline1.Trim().Split(' ');
+                    string[] l3 = currentline3.Trim().Split(' ');
+                    string[] l4 = currentline4.Trim().Split(' ');
+                    string[] l5 = currentline5.Trim().Split(' ');
+                    float v1x, v1y, v1z, v2x, v2y, v2z, v3x, v3y, v3z, n1, n2, n3;
+                    bool b1 = float.TryParse(l1[2], out n1);
+                    bool b2 = float.TryParse(l1[3], out n2);
+                    bool b3 = float.TryParse(l1[4], out n3);
+                    bool b4 = float.TryParse(l3[1], out v1x);
+                    bool b5 = float.TryParse(l3[2], out v1y);
+                    bool b6 = float.TryParse(l3[3], out v1z);
+                    bool b7 = float.TryParse(l4[1], out v2x);
+                    bool b8 = float.TryParse(l4[2], out v2y);
+                    bool b9 = float.TryParse(l4[3], out v2z);
+                    bool b10 = float.TryParse(l5[1], out v3x);
+                    bool b11 = float.TryParse(l5[2], out v3y);
+                    bool b12 = float.TryParse(l5[3], out v3z);
+                    if (!(b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8 && b9 && b10 && b11 && b12))
+                    {
+                        failed = true;
+                        break;
+                    }
+                    Point3 V1 = new Point3(v1x, v1y, v1z);
+                    Point3 V2 = new Point3(v2x, v2y, v2z);
+                    Point3 V3 = new Point3(v3x, v3y, v3z);
+                    Vector3 norm = new Vector3(n1, n2, n3);
+                    fs.Add(new Facet(V1, V2, V3, norm));
+                }
+                int u = 84;
+                byte[] meta = File.ReadAllBytes(path);
+                while (u < meta.Count() && !done && !failed)
+                {
+                    try
+                    {
+                        float n1 = BitConverter.ToSingle(meta, u);
+                        float n2 = BitConverter.ToSingle(meta, u + 4);
+                        float n3 = BitConverter.ToSingle(meta, u + 8);
+                        float v1x = BitConverter.ToSingle(meta, u + 12);
+                        float v1y = BitConverter.ToSingle(meta, u + 16);
+                        float v1z = BitConverter.ToSingle(meta, u + 20);
+                        float v2x = BitConverter.ToSingle(meta, u + 24);
+                        float v2y = BitConverter.ToSingle(meta, u + 28);
+                        float v2z = BitConverter.ToSingle(meta, u + 32);
+                        float v3x = BitConverter.ToSingle(meta, u + 36);
+                        float v3y = BitConverter.ToSingle(meta, u + 40);
+                        float v3z = BitConverter.ToSingle(meta, u + 44);
+                        u += 50;
+                        Point3 v1 = new Point3(v1x, v1y, v1z);
+                        Point3 v2 = new Point3(v2x, v2y, v2z);
+                        Point3 v3 = new Point3(v3x, v3y, v3z);
+                        Vector3 n = new Vector3(n1, n2, n3);
+                        fs.Add(new Facet(v1, v2, v3, n));
+                    }
+                    catch
+                    {
+                        failed = true;
+                    }
+
+                }
+            }
+            return fs;
+        }
+        public void Save(string filepath)
+        {
+            using (System.IO.StreamWriter W = new System.IO.StreamWriter(filepath))
+            {
+                W.WriteLine("solid " + filepath);
+                foreach (Facet f in data)
+                {
+                    W.WriteLine(" facet normal " + f.Normal.I.ToString() + " " + f.Normal.J.ToString() + " " + f.Normal.K.ToString());
+                    W.WriteLine("  outer loop");
+                    W.WriteLine("   vertex " + f.V1.X.ToString() + " " + f.V1.Y.ToString() + " " + f.V1.Z.ToString());
+                    W.WriteLine("   vertex " + f.V2.X.ToString() + " " + f.V2.Y.ToString() + " " + f.V2.Z.ToString());
+                    W.WriteLine("   vertex " + f.V3.X.ToString() + " " + f.V3.Y.ToString() + " " + f.V3.Z.ToString());
+                    W.WriteLine("  endloop");
+                    W.WriteLine(" endfacet");
+                }
+                W.WriteLine("endsolid");
+            }
+
+        }
+    }
+}
