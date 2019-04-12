@@ -1,0 +1,152 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using _3DSimple;
+namespace STL_Loader_v1
+{
+    public class Facet
+    {
+        private Vector3 norm;
+        private Point3 v1, v2, v3;
+        private Point3 Mid;
+        private const double PRETTY_MUCH_ZERO = 1E-9;
+        public Vector3 Normal
+        {
+            get { return norm; }
+        }
+        public Point3 V1
+        {
+            get { return v1; }
+        }
+        public Point3 V2
+        {
+            get { return v2; }
+        }
+        public Point3 V3
+        {
+            get { return v3; }
+        }
+        public Point3 Midpoint
+        {
+            get { return Mid; }
+        }
+        public Facet(Point3 V1, Point3 V2, Point3 V3, Vector3 Norm)
+        {
+            v1 = V1; v2 = V2; v3 = V3; norm = Norm;
+            Mid = new Point3((V1.X + V2.X+V3.X)/3, (V1.Y + V2.Y+V3.Y)/3, (V1.Z + V2.Z+V3.Z)/3);
+        }
+        public override string ToString()
+        {
+            return v1.ToString() + " " + v2.ToString() + " " + v3.ToString() + " " + norm.ToString();
+        }
+        public Facet OnXYdist(float bottom)
+        {
+            Point3 V1p = v1;
+            Point3 V2p = v2;
+            Point3 V3p = v3;
+            V1.Z = bottom;
+            V2.Z = bottom;
+            V3.Z = bottom;
+            Vector3 V = new Vector3(0, 0, 1);
+            return new Facet(V1p, V2p, V3p, V);
+        }
+        public double Area()
+        {
+            Vector3 P12 = new Vector3(v1, v2);
+            Vector3 P13 = new Vector3(v1, v3);
+            Vector3 P23 = new Vector3(v2, v3);
+            double dot_13_12 = (P13.I * P12.I) + (P13.J * P12.J) + (P13.K * P12.K);
+            double p12n = P12.Norm * P12.Norm;
+            double r = dot_13_12 / p12n;
+            double h = (P13 - (r * P12)).Norm;
+            double toret = h * 0.5f * P12.Norm;
+            if (toret.ToString() == "NaN")
+            { return 0; }
+            return toret;
+        }
+        public static bool operator |(Facet F1, Facet F2)
+        {
+            int no_of_zeros = 0;
+            if (new Vector3(F1.V1, F2.V1).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V1, F2.V2).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V1, F2.V3).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V2, F2.V1).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V2, F2.V2).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V2, F2.V3).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V3, F2.V1).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V3, F2.V2).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V3, F2.V3).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            return no_of_zeros == 2;
+        }
+        public static bool operator ^(Facet F1, Facet F2)
+        {
+            int no_of_zeros = 0;
+            if (new Vector3(F1.V1, F2.V1).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V1, F2.V2).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V1, F2.V3).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V2, F2.V1).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V2, F2.V2).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V2, F2.V3).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V3, F2.V1).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V3, F2.V2).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            if (new Vector3(F1.V3, F2.V3).Norm < PRETTY_MUCH_ZERO)
+            {
+                no_of_zeros++;
+            }
+            return no_of_zeros == 1;
+        }
+    }
+}
