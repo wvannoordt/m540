@@ -7,13 +7,13 @@ using System.IO;
 
 namespace m540
 {
-	public class Timer
+	public class StopWatch
 	{
 		DateTime pre, post;
 		string task;
 		double elapsed_ms;
-		public Timer(string _task) {task = _task; elapsed_ms = -1;}
-		public Timer():this(null){}
+		public StopWatch(string _task) {task = _task; elapsed_ms = -1;}
+		public StopWatch():this(null){}
 		public double ElapsedMilliseconds
 		{
 			get
