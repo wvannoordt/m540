@@ -27,8 +27,8 @@ public class Program
 			Console.WriteLine("Trial " + i.ToString() + "\n");
 			try
 			{
-				Timer t1 = new Timer("load");
-				Timer t2 = new Timer("compute");
+				StopWatch t1 = new StopWatch("load");
+				StopWatch t2 = new StopWatch("compute");
 				t1.tic();
 				StlClassifier classifier = new StlClassifier("./test.stl", 40);
 				t1.toc();
