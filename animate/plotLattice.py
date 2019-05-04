@@ -4,8 +4,8 @@ Plots nodes and edges frame by frame. Animate these with ImageMagick (or somethi
 
 import csv
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+#import matplotlib.pyplot as plt
+#from mpl_toolkits.mplot3d import Axes3D
 import vispy.scene
 from vispy import app, gloo, visuals
 from vispy.scene import visuals
@@ -15,7 +15,9 @@ canvas = vispy.scene.SceneCanvas(title = 'Nodes and Edges', size = (800,600), ke
 view = canvas.central_widget.add_view()
 
 nodeRead = [] #using to read and transfer nodes into an array
-with open('/Users/shuke/Documents/M540/node.csv') as csvDataFile:
+
+i=1
+with open('/Users/Aaron/Documents/Math 540/Experiments/timestep_' + str(i) + '/node.csv') as csvDataFile:
     reader = csv.reader(csvDataFile,quoting=csv.QUOTE_NONNUMERIC) #Changes everything to a float
     for row in reader: #each row is a list
         nodeRead.append(row)
@@ -24,21 +26,24 @@ nodes=np.array(nodeRead) #Nodes is now our array of nodes which is nX3
 numberNodes= len(nodes)
 
 #This will save the edges into four different arrays of the node1, node2 , springConst, and broken as a bool
-with open('/Users/shuke/Documents/M540/edge.csv') as csvDataFile2:
+with open('/Users/Aaron/Documents/Math 540/Experiments/timestep_' + str(i) +'/edge.csv') as csvDataFile2:
     edges = csv.reader(csvDataFile2, delimiter = ',')
     node1=[]
     node2=[]
+    equilibDist= []
     springConst=[]
     broken=[]
 
     for row in edges: #Reads a row as {node 1, node2 , spring constant, True / False for broken}
         node1Int = int(row[0])
         node2Int = int(row[1])
-        springConstFloat = float(row[2])
-        brokenString = float(row[3])
+        equilibDistFloat = float(row[2])
+        springConstFloat = float(row[3])
+        brokenString = bool(row[4])
         node1.append(node1Int)
         node2.append(node2Int)
         springConst.append(springConstFloat)
+        equilibDist.append(equilibDistFloat)
         broken.append(brokenString)
 
 
@@ -53,6 +58,13 @@ pos[:,2] = nodes[:,2]
 connections = np.empty((numberConnections, 2), np.int32)
 connections[:,0] = node1
 connections[:,1] = node2
+
+
+#Creating colors for the lines
+#Aaron Still working on this seciton
+#nodeColors=np.zeros(numberConnections,4)
+#lineColors=np.zeros(numberNodes,4)
+
 #Plotting the data
 
 
@@ -64,7 +76,7 @@ view.add(scatter)
 lines=vispy.scene.visuals.Arrow(pos, connect=connections, color = (1,0,0,.5) ,arrow_size=None)
 view.add(lines)
 view.camera = 'turntable'  # or try 'arcball'
-
+canvas.show()
 
 
 if __name__ == '__main__':
